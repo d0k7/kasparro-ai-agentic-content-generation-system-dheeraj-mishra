@@ -1,4 +1,4 @@
-# Kasparro Applied AI Engineer Challenge — Multi-Agent Content Generation System
+# Kasparro Applied AI Engineer Challenge Multi-Agent Content Generation System
 
 This repository implements a **deterministic, modular, agentic content generation system** that converts a single product dataset into **three structured JSON pages** using a **DAG-orchestrated multi-agent pipeline**.
 
