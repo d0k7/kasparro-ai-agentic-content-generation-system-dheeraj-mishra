@@ -1,0 +1,19 @@
+# venvs
+kaspar/
+kaspar_BACKUP/
+.venv/
+venv/
+
+# caches
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# editor
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
