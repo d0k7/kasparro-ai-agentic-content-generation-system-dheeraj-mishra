@@ -29,7 +29,7 @@ This implementation emphasizes:
 - **Deterministic execution**
 - **Production-grade tooling and testing**
 
-The goal is to model how an agentic content system would be built in a real engineering environment, not as a demo script.
+The goal is to model how an agentic content system would be built in a real engineering environment.
 
 ---
 
@@ -80,57 +80,84 @@ yaml
 ### Virtual Environment
 
 python -m venv kaspar
+
 .\kaspar\Scripts\Activate.ps1
+
 python -m pip install --upgrade pip
+
 pip install -r requirements-dev.txt
 
 
 Quality Gates
+
 All checks must pass:
 
 ruff check .
+
 mypy src
+
 pytest -q
 
 
 Run the Pipeline
+
 The project follows the standard src/layout.
 
 $env:PYTHONPATH="src"
+
 python -m kasparro_agentic --log-level INFO --out-dir outputs
 
 
 Linux / macOS
+
 PYTHONPATH=src python -m kasparro_agentic --log-level INFO --out-dir outputs
 
 
 Orchestration Details:-
 
 Execution is managed by an explicit DAG
+
 Nodes declare dependencies
+
 Cycles are prevented
+
 Per-node execution timing is logged
+
 DAG metadata is exported to JSON
 
 outputs/dag_metadata.json
 
+
 Determinism Guarantee
+
 This system is fully deterministic :
 
 No randomness
+
 No external APIs or network calls
+
 No external facts or assumptions
+
 All content derived strictly from the provided dataset
+
 Snapshot tests enforce output stability across runs.
 
-Documentation
+
+Documentation:-
+
+
 Detailed system design documentation is available at:
 
 docs/projectdocumentation.md
 
-This covers:
+
+This covers:-
+
 
 Architecture decisions
+
 Agent responsibilities
+
 DAG structure
+
 Scope and assumptions
