@@ -1,0 +1,66 @@
+{
+  "comparison": {
+    "differences": {
+      "benefits": {
+        "product_a": [
+          "Brightening",
+          "Fades dark spots"
+        ],
+        "product_b": [
+          "Oil control",
+          "Helps even-looking tone"
+        ]
+      },
+      "ingredients": {
+        "product_a_only": [
+          "Hyaluronic Acid",
+          "Vitamin C"
+        ],
+        "product_b_only": [
+          "Niacinamide",
+          "Panthenol"
+        ],
+        "shared": []
+      },
+      "price_inr": {
+        "delta_b_minus_a": 100,
+        "product_a": 699,
+        "product_b": 799
+      }
+    },
+    "selection_guide": [
+      "Choose based on which ingredient set you prefer and what benefits you prioritize.",
+      "If you have sensitive skin, introduce new actives gradually and monitor tolerance."
+    ],
+    "shared": {
+      "format_note": "Both are serums.",
+      "price_note": "Both are priced in INR (value depends on preferences and tolerance)."
+    }
+  },
+  "disclaimer": "Product B is fictional. Informational only.",
+  "page_type": "comparison_page",
+  "product_a": {
+    "benefits": [
+      "Brightening",
+      "Fades dark spots"
+    ],
+    "key_ingredients": [
+      "Vitamin C",
+      "Hyaluronic Acid"
+    ],
+    "price_inr": 699,
+    "product_name": "GlowBoost Vitamin C Serum"
+  },
+  "product_b": {
+    "benefits": [
+      "Oil control",
+      "Helps even-looking tone"
+    ],
+    "key_ingredients": [
+      "Niacinamide",
+      "Panthenol"
+    ],
+    "price_inr": 799,
+    "product_name": "RadiantFix Niacinamide Serum (Fictional)"
+  }
+}

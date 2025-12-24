@@ -1,0 +1,55 @@
+{
+  "execution_order": [
+    "data_parser",
+    "question_generator",
+    "faq_page_builder",
+    "product_page_builder",
+    "comparison_page_builder",
+    "dag_metadata_writer",
+    "output_writer"
+  ],
+  "nodes": [
+    {
+      "depends_on": [],
+      "name": "data_parser"
+    },
+    {
+      "depends_on": [
+        "data_parser"
+      ],
+      "name": "question_generator"
+    },
+    {
+      "depends_on": [
+        "question_generator"
+      ],
+      "name": "faq_page_builder"
+    },
+    {
+      "depends_on": [
+        "data_parser"
+      ],
+      "name": "product_page_builder"
+    },
+    {
+      "depends_on": [
+        "data_parser"
+      ],
+      "name": "comparison_page_builder"
+    },
+    {
+      "depends_on": [
+        "faq_page_builder",
+        "product_page_builder",
+        "comparison_page_builder"
+      ],
+      "name": "dag_metadata_writer"
+    },
+    {
+      "depends_on": [
+        "dag_metadata_writer"
+      ],
+      "name": "output_writer"
+    }
+  ]
+}
