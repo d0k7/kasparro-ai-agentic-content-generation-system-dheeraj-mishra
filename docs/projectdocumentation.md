@@ -50,5 +50,5 @@ Logic blocks are pure functions in `logic_blocks/`:
 - Snapshot tests: output JSON stability across refactors
 - CI: ruff + mypy + pytest run on every push/PR
 
-# Optional Diagram (Conceptual)
+# Diagram (Conceptual)
 raw_product -> parser -> question_gen -> { faq_builder, product_builder, comparison_builder } -> metadata -> writer
