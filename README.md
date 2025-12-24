@@ -1,70 +1,83 @@
-# Kasparro Applied AI Engineer Challenge Multi-Agent Content Generation System
+# Kasparro Applied AI Engineer Challenge  
+## Multi-Agent Content Generation System
 
-This repository implements a **deterministic, modular, agentic content generation system** that converts a single product dataset into **three structured JSON pages** using a **DAG-orchestrated multi-agent pipeline**.
+This repository implements a **deterministic, modular, multi-agent content generation pipeline** that converts a single structured product dataset into multiple **production-ready JSON content pages**, orchestrated using a **Directed Acyclic Graph (DAG)**.
 
-Outputs generated:
-- FAQ Page (`faq.json`)
-- Product Description Page (`product_page.json`)
-- Comparison Page with a **fictional Product B** (`comparison_page.json`)
-- DAG metadata (`dag_metadata.json`)
-
-The system emphasizes:
-- **Modular agents** with clear responsibilities
-- **Reusable logic blocks**
-- **Orchestration via DAG**
-- **Structured output pipelines**
-- Production-quality tooling: **ruff + mypy + pytest (snapshot tests)**
+The system is designed to demonstrate **real-world agentic system design**, focusing on modularity, reusability, orchestration, and correctness rather than prompt tricks or shallow automation.
 
 ---
 
-## Requirements Met (Assignment Mapping)
+## Outputs
 
-- ✅ Parse product input into internal model
-- ✅ Generate **≥ 15 categorized questions**
-- ✅ Implement your own templates for:
+Running the pipeline generates the following artifacts:
+
+- `outputs/faq.json` — FAQ page with categorized questions and answers  
+- `outputs/product_page.json` — Structured product description page  
+- `outputs/comparison_page.json` — Product comparison with a fictional Product B  
+- `outputs/dag_metadata.json` — DAG execution order, dependencies, and timing  
+
+---
+
+## Design Goals
+
+This implementation emphasizes:
+
+- **Single-responsibility agents**
+- **Reusable logic blocks shared across templates**
+- **Explicit DAG-based orchestration**
+- **Strictly structured JSON outputs**
+- **Deterministic execution**
+- **Production-grade tooling and testing**
+
+The goal is to model how an agentic content system would be built in a real engineering environment, not as a demo script.
+
+---
+
+## Assignment Requirements
+
+All requirements from the assignment are fully satisfied:
+
+- Parse raw product input into internal typed models  
+- Generate **15+ categorized questions**  
+- Implement custom templates for:
   - FAQ page
   - Product description page
-  - Comparison page
-- ✅ Logic blocks reused across templates
-- ✅ Agents build pages and write structured JSON outputs
-- ✅ Comparison includes **fictional Product B**
-- ✅ Output JSONs:
-  - `outputs/faq.json`
-  - `outputs/product_page.json`
-  - `outputs/comparison_page.json`
-- ✅ Orchestration flow exposed via:
-  - `outputs/dag_metadata.json`
-- ✅ Clean code + type safety + tests
+  - Comparison page  
+- Reuse logic blocks across multiple page types  
+- Include a **fictional Product B** for comparison  
+- Produce structured JSON outputs only  
+- Expose orchestration flow via DAG metadata  
+- Enforce code quality, typing, and deterministic tests  
 
 ---
 
 ## Project Structure
 
 src/kasparro_agentic/
-agents/ # modular agents (parser, question gen, page builders, writer)
-core/ # logging, validation, errors
-data/ # RAW_PRODUCT_DATA
-logic_blocks/ # reusable content logic (faq, product_page, comparison)
-templates/ # template engine + page templates + registry
-orchestration/ # DAGRunner + Node
-pipeline.py # builds DAG and runs pipeline
-main.py # CLI entrypoint
+├─ agents/ # Parser, question generator, page builders, output writer
+├─ core/ # Logging, validation, error handling
+├─ data/ # RAW_PRODUCT_DATA
+├─ logic_blocks/ # Reusable content logic (FAQ, product, comparison)
+├─ templates/ # Template engine, page templates, registry
+├─ orchestration/ # DAGRunner and Node abstractions
+├─ pipeline.py # DAG construction and execution
+└─ main .py # CLI entrypoint
 
 tests/
-snapshots/ # deterministic expected JSON outputs
-test_pipeline.py # snapshot test comparing generated outputs to snapshots
-conftest.py # adds src/ to sys.path for tests
+├─ snapshots/ # Deterministic expected JSON outputs
+├─ test_pipeline.py # Snapshot-based regression tests
+└─ conftest.py # PYTHONPATH setup
 
 docs/
-projectdocumentation.md # required documentation (system design + scope + assumptions)
+└─ projectdocumentation.md # System design, scope, assumptions
 
-
+yaml
 
 ---
 
 ## Setup
 
-### Create & activate venv (Windows PowerShell)
+### Virtual Environment
 
 python -m venv kaspar
 .\kaspar\Scripts\Activate.ps1
@@ -72,69 +85,52 @@ python -m pip install --upgrade pip
 pip install -r requirements-dev.txt
 
 
-Quality Checks
+Quality Gates
+All checks must pass:
+
 ruff check .
 mypy src
 pytest -q
 
 
-
-Run Pipeline (Generate Outputs)
-
-This repo uses a standard src/ layout. Add src to PYTHONPATH before running.
-
-Windows PowerShell
+Run the Pipeline
+The project follows the standard src/layout.
 
 $env:PYTHONPATH="src"
 python -m kasparro_agentic --log-level INFO --out-dir outputs
 
-Linux/macOS
 
+Linux / macOS
 PYTHONPATH=src python -m kasparro_agentic --log-level INFO --out-dir outputs
 
 
-After running, you will have:
+Orchestration Details:-
 
-outputs/faq.json
-
-outputs/product_page.json
-
-outputs/comparison_page.json
-
-outputs/dag_metadata.json
-
-
-
-Orchestration (DAG)
-
-The pipeline is executed using a DAG runner that:
-
-topologically sorts nodes
-
-detects cycles
-
-logs timing for each node
-
-provides describe() for orchestration introspection
-
-The DAG metadata is written to:
+Execution is managed by an explicit DAG
+Nodes declare dependencies
+Cycles are prevented
+Per-node execution timing is logged
+DAG metadata is exported to JSON
 
 outputs/dag_metadata.json
 
-Determinism & No External Data
-
-This implementation is fully deterministic:
-
-No network calls
+Determinism Guarantee
+This system is fully deterministic :
 
 No randomness
+No external APIs or network calls
+No external facts or assumptions
+All content derived strictly from the provided dataset
+Snapshot tests enforce output stability across runs.
 
-No external facts
+Documentation
+Detailed system design documentation is available at:
 
-All answers and content are derived only from the provided dataset fields
+docs/projectdocumentation.md
 
-Snapshot tests enforce stable outputs.
+This covers:
 
-
-
-
+Architecture decisions
+Agent responsibilities
+DAG structure
+Scope and assumptions
