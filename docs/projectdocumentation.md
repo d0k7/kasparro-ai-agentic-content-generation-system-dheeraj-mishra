@@ -17,7 +17,12 @@ All work is performed by agents connected through a DAG orchestrator.
 - Product B in the comparison is explicitly fictional and generated internally.
 - Content is deterministic and rule-based for repeatability and testability.
 
-# System Design (Most Important)
+# System Design
+This assignment expects two core engineering signals:
+1) **Agentization**: split the pipeline into modular, single-responsibility units.
+2) **Orchestration**: run those units via an explicit dependency graph (DAG), not a hard-coded sequence.
+
+
 ## Agents (Single Responsibility)
 - DataParserAgent: raw dict -> Product model
 - QuestionGenerationAgent: Product -> categorized questions (>=15)
