@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product_name }} FAQ</title>
+</head>
+<body>
+    <h1>{{ product_name }} - FAQ</h1>
+    <h2>Generated Questions:</h2>
+    <ul>
+        {% for question in questions %}
+            <li>{{ question }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Generated Answer:</h2>
+    <p>{{ answer }}</p>
+</body>
+</html>

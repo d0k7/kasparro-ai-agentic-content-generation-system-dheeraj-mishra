@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Integration Test</title>
+    <script src="https://js.puter.com/v2/"></script> <!-- Import Puter.js -->
+</head>
+<body>
+    <h1>LLM Integration Test</h1>
+    <div id="output"></div> <!-- This will display the response from Puter.js -->
+
+    <script>
+        // Example: Generate product page description with LLM
+        puter.ai.chat("Tell me about GlowBoost Vitamin C Serum", { model: "gpt-5-nano" })
+            .then(response => {
+                document.getElementById("output").innerHTML = `
+                    <h2>Generated Response:</h2>
+                    <pre>${response}</pre>
+                `;
+            })
+            .catch(error => {
+                document.getElementById("output").innerHTML = `
+                    <h2>Error:</h2>
+                    <pre>${error}</pre>
+                `;
+            });
+    </script>
+</body>
+</html>

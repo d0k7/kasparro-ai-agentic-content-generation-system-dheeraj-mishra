@@ -1,52 +1,56 @@
 from __future__ import annotations
 
-from ..core.validation import require, require_not_none
-from ..models import PipelineState, Question
-from .base import Agent
+from kasparro_agentic.llm.provider import build_llm_provider
+from kasparro_agentic.models import Product, Question, QuestionList
 
 
-class QuestionGenerationAgent(Agent[PipelineState]):
-    """Generates >=15 categorized user questions deterministically from the product model."""
+def generate_questions(product: Product) -> list[Question]:
+    llm = build_llm_provider()
 
-    @property
-    def name(self) -> str:
-        return "question_generator"
+    prompt = f"""
+Generate at least 15 product FAQ questions with categories.
+Return JSON matching this schema:
 
-    def run(self, state: PipelineState) -> PipelineState:
-        p = require_not_none(state.product, "QuestionGenerationAgent: product missing (run parser first).")
+{{
+  "questions": [
+    {{"category": "Benefits", "question": "..."}},
+    ...
+  ]
+}}
 
-        skin = ", ".join(p.skin_type)
-        benefits = ", ".join(p.benefits)
-        ingredients = ", ".join(p.key_ingredients)
+Product context:
+- product_name: {product.product_name}
+- brand: {product.brand}
+- category: {product.category}
+- benefits: {product.benefits}
+- how_to_use: {product.how_to_use}
+""".strip()
 
-        questions: list[Question] = [
-            # Informational
-            Question("Informational", f"What is {p.product_name}?"),
-            Question("Informational", f"What is the concentration of Vitamin C in {p.product_name}?"),
-            Question("Informational", f"Which skin types is {p.product_name} meant for?"),
-            Question("Informational", f"What are the key ingredients in {p.product_name}?"),
-            Question("Informational", f"What benefits does {p.product_name} claim? ({benefits})"),
+    out = llm.invoke_structured(prompt, QuestionList)
+    return out.questions
 
-            # Usage
-            Question("Usage", f"How do I use {p.product_name} in a morning routine?"),
-            Question("Usage", f"How many drops of {p.product_name} should I apply?"),
-            Question("Usage", f"When should I apply sunscreen if I use {p.product_name}?"),
-            Question("Usage", f"Can {p.product_name} be used daily for {skin} skin?"),
 
-            # Safety
-            Question("Safety", f"Are there any side effects from using {p.product_name}?"),
-            Question("Safety", f"What should sensitive skin users know before trying {p.product_name}?"),
-            Question("Safety", f"What does mild tingling mean when using {p.product_name}?"),
+def generate_answer(product: Product, question: str) -> str:
+    llm = build_llm_provider()
 
-            # Purchase
-            Question("Purchase", f"What is the price of {p.product_name}?"),
-            Question("Purchase", f"Is ₹{p.price_inr} reasonable given its ingredients ({ingredients})?"),
+    prompt = f"""
+You are an expert product assistant.
+Write a clear, helpful, safe, non-medical answer to the question below,
+based on the provided product context.
 
-            # Comparison
-            Question("Comparison", f"How does {p.product_name} compare to another serum with different actives?"),
-            Question("Comparison", f"What should I compare when choosing between {p.product_name} and a different serum?"),
-        ]
+Question: {question}
 
-        require(len(questions) >= 15, "QuestionGenerationAgent must generate at least 15 questions.")
-        state.questions = questions
-        return state
+Product Context:
+- Name: {product.product_name}
+- Brand: {product.brand}
+- Key Ingredients: {product.key_ingredients}
+- How to use: {product.how_to_use}
+- Side effects: {product.side_effects}
+
+Constraints:
+- Be practical and consumer-friendly.
+- Mention patch test and irritation guidance.
+- Avoid medical claims.
+""".strip()
+
+    return llm.invoke_text(prompt).strip()

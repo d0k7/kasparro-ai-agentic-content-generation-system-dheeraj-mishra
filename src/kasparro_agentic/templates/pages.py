@@ -1,87 +1,162 @@
 from __future__ import annotations
 
-from ..logic_blocks import (
-    build_comparison,
-    build_faq_items,
-    build_product_b,
-    build_product_highlights,
-    build_product_summary,
+from dataclasses import dataclass
+
+from kasparro_agentic.logic_blocks.blocks import (
+    compare_benefits,
+    compare_ingredient_sets,
+    compare_price,
+    disclaimer_fictional_product,
+    disclaimer_informational,
+    normalize_product,
+    one_liner_summary,
+    product_page_highlights,
+    safety_block,
+    usage_block,
 )
-from ..models import PipelineState
-from .template_engine import Template, TemplateField
-
-FAQ_DISCLAIMER = "Informational only. Not medical advice. Patch test when trying new skincare."
-GENERIC_DISCLAIMER = "Informational only. This content is generated from a limited dataset."
-COMPARISON_DISCLAIMER = "Product B is fictional. Informational only."
-
-
-def _faq_items(state: PipelineState) -> object:
-    assert state.product is not None
-    assert state.questions is not None
-
-    items = build_faq_items(state.product, state.questions, min_items=5)
-    return [{"question": i.question, "answer": i.answer, "category": i.category} for i in items]
-
-
-FAQ_TEMPLATE: Template[PipelineState] = Template(
-    name="faq_template",
-    fields=(
-        TemplateField("page_type", lambda _: "faq"),
-        TemplateField("product_name", lambda s: s.product.product_name if s.product else ""),
-        TemplateField("items", _faq_items),
-        TemplateField("disclaimer", lambda _: FAQ_DISCLAIMER),
-    ),
-)
-
-PRODUCT_TEMPLATE: Template[PipelineState] = Template(
-    name="product_template",
-    fields=(
-        TemplateField("page_type", lambda _: "product_page"),
-        TemplateField("product_name", lambda s: s.product.product_name if s.product else ""),
-        TemplateField("summary", lambda s: build_product_summary(s.product) if s.product else ""),
-        TemplateField("highlights", lambda s: build_product_highlights(s.product) if s.product else {}),
-        TemplateField("disclaimer", lambda _: GENERIC_DISCLAIMER),
-    ),
+from kasparro_agentic.models import (
+    ComparisonDifferences,
+    ComparisonPage,
+    ComparisonProductBlock,
+    ComparisonSection,
+    ComparisonSimilarities,
+    FAQItem,
+    FAQPage,
+    FictionalProduct,
+    Product,
+    ProductPage,
+    Question,
 )
 
 
-def _ensure_product_b(state: PipelineState) -> None:
-    if state.fictional_product_b is None:
-        state.fictional_product_b = build_product_b()
+def render_faq_page(product: Product, questions: list[Question]) -> FAQPage:
+    p = normalize_product(product)
+
+    items: list[FAQItem] = []
+    for q in questions:
+        if q.category == "Usage":
+            ans = usage_block(p)
+        elif q.category == "Safety":
+            ans = safety_block(p)
+        elif q.category == "Price":
+            ans = f"The listed price is ₹{p.price_inr}."
+        elif q.category == "Vitamin C %":
+            ans = f"Concentration: {p.concentration}."
+        else:
+            ans = "This information is not specified in the provided dataset."
+
+        items.append(FAQItem(category=q.category, question=q.question, answer=ans))
+
+    return FAQPage(
+        product_name=p.product_name,
+        disclaimer=disclaimer_informational(),
+        items=items[:15],
+    )
 
 
-def _comparison_payload(state: PipelineState) -> dict[str, object]:
-    assert state.product is not None
-    _ensure_product_b(state)
-    assert state.fictional_product_b is not None
-
-    a = state.product
-    b = state.fictional_product_b
-
-    return {
-        "product_a": {
-            "product_name": a.product_name,
-            "key_ingredients": list(a.key_ingredients),
-            "benefits": list(a.benefits),
-            "price_inr": a.price_inr,
-        },
-        "product_b": {
-            "product_name": b.product_name,
-            "key_ingredients": list(b.key_ingredients),
-            "benefits": list(b.benefits),
-            "price_inr": b.price_inr,
-        },
-        "comparison": build_comparison(a, b),
-    }
+def render_product_page(product: Product) -> ProductPage:
+    p = normalize_product(product)
+    return ProductPage(
+        product_name=p.product_name,
+        brand=p.brand,
+        price_inr=p.price_inr,
+        summary=one_liner_summary(p),
+        highlights=product_page_highlights(p),
+    )
 
 
-COMPARISON_TEMPLATE: Template[PipelineState] = Template(
-    name="comparison_template",
-    fields=(
-        TemplateField("page_type", lambda _: "comparison_page"),
-        TemplateField("product_a", lambda s: _comparison_payload(s)["product_a"]),
-        TemplateField("product_b", lambda s: _comparison_payload(s)["product_b"]),
-        TemplateField("comparison", lambda s: _comparison_payload(s)["comparison"]),
-        TemplateField("disclaimer", lambda _: COMPARISON_DISCLAIMER),
-    ),
-)
+def render_comparison_page(product_a: Product, product_b: FictionalProduct) -> ComparisonPage:
+    a = normalize_product(product_a)
+    b = normalize_product(product_b)
+
+    a_block = ComparisonProductBlock(
+        product_name=a.product_name,
+        price_inr=a.price_inr,
+        key_ingredients=list(a.key_ingredients),
+        benefits=list(a.benefits),
+        skin_type=list(a.skin_type),
+    )
+    b_block = ComparisonProductBlock(
+        product_name=b.product_name,
+        price_inr=b.price_inr,
+        key_ingredients=list(b.key_ingredients),
+        benefits=list(b.benefits),
+        skin_type=list(b.skin_type),
+    )
+
+    similarities = ComparisonSimilarities(
+        key_ingredients=compare_ingredient_sets(a, b),
+        benefits=compare_benefits(a, b),
+    )
+
+    differences = ComparisonDifferences(
+        ingredients=compare_ingredient_sets(a, b),
+        skin_type=(
+            f"{a.product_name} skin types: {', '.join(a.skin_type)}. "
+            f"{b.product_name} skin types: {', '.join(b.skin_type)}."
+        ),
+        pricing=compare_price(a, b),
+    )
+
+    section = ComparisonSection(
+        similarities=similarities,
+        differences=differences,
+    )
+
+    return ComparisonPage(
+        disclaimer=disclaimer_fictional_product(),
+        product_a=a_block,
+        product_b=b_block,
+        comparison=section,
+    )
+
+
+# -------------------------------------------------------------------
+# Template classes (registry.py expects these names)
+# -------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class QuestionTemplate:
+    """
+    Backwards-compat for registry imports.
+
+    Note: agentic question generation is handled in agents/question_agent.py (LLM-based),
+    but this template provides a safe deterministic fallback if used directly.
+    """
+    def render(self, product: Product) -> list[Question]:
+        name = product.product_name
+        return [
+            Question(category="Informational", question=f"What is {name}?"),
+            Question(category="Ingredients", question="What are the key ingredients?"),
+            Question(category="Benefits", question="What benefits does it provide?"),
+            Question(category="Skin Type", question="Is it suitable for my skin type?"),
+            Question(category="Usage", question="How do I use it?"),
+            Question(category="Safety", question="Are there any side effects or precautions?"),
+            Question(category="Routine", question="Where does it fit in my routine?"),
+            Question(category="Sunscreen", question="Do I need sunscreen after using it?"),
+            Question(category="Storage", question="How should I store it?"),
+            Question(category="Results", question="When can I expect results?"),
+            Question(category="Frequency", question="How often should I use it?"),
+            Question(category="Layering", question="Can I layer it with other actives?"),
+            Question(category="Irritation", question="What if it causes irritation?"),
+            Question(category="Price", question="What is the price?"),
+            Question(category="Vitamin C %", question="What is the Vitamin C concentration?"),
+        ]
+
+
+@dataclass(frozen=True)
+class FAQTemplate:
+    def render(self, product: Product, questions: list[Question]) -> FAQPage:
+        return render_faq_page(product, questions)
+
+
+@dataclass(frozen=True)
+class ProductPageTemplate:
+    def render(self, product: Product) -> ProductPage:
+        return render_product_page(product)
+
+
+@dataclass(frozen=True)
+class ComparisonPageTemplate:
+    def render(self, product_a: Product, product_b: FictionalProduct) -> ComparisonPage:
+        return render_comparison_page(product_a, product_b)

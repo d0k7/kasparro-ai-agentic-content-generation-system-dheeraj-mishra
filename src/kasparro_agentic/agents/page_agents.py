@@ -1,57 +1,33 @@
 from __future__ import annotations
 
-from ..core.validation import (
-    require,
-    validate_comparison_page,
-    validate_faq_page,
-    validate_product_page,
-)
-from ..models import PipelineState
-from ..templates.registry import DEFAULT_REGISTRY
-from .base import Agent
+from typing import Any
+
+from kasparro_agentic.llm.provider import build_llm_provider
+from kasparro_agentic.logic_blocks.comparison import build_fictional_product_b
+from kasparro_agentic.logic_blocks.comparison_page import build_comparison_page
+from kasparro_agentic.logic_blocks.faq import build_faq_page
+from kasparro_agentic.logic_blocks.product_page import build_product_page
+from kasparro_agentic.models import FictionalProduct, Product, Question
 
 
-class FAQPageAgent(Agent[PipelineState]):
-    @property
-    def name(self) -> str:
-        return "faq_page_builder"
-
-    def run(self, state: PipelineState) -> PipelineState:
-        require(state.product is not None, "FAQPageAgent: product missing (run parser first).")
-        require(state.questions is not None, "FAQPageAgent: questions missing (run question generator first).")
-
-        payload = DEFAULT_REGISTRY.get("faq").render(state)
-        validate_faq_page(payload)
-
-        state.faq_page = payload
-        return state
+def build_faq_page_agent(product: Product, questions: list[Question]) -> dict[str, Any]:
+    llm = build_llm_provider()
+    page = build_faq_page(product=product, questions=questions, llm=llm)
+    return page.model_dump()
 
 
-class ProductPageAgent(Agent[PipelineState]):
-    @property
-    def name(self) -> str:
-        return "product_page_builder"
-
-    def run(self, state: PipelineState) -> PipelineState:
-        require(state.product is not None, "ProductPageAgent: product missing (run parser first).")
-
-        payload = DEFAULT_REGISTRY.get("product_page").render(state)
-        validate_product_page(payload)
-
-        state.product_page = payload
-        return state
+def build_product_page_agent(product: Product) -> dict[str, Any]:
+    llm = build_llm_provider()
+    page = build_product_page(product=product, llm=llm)
+    return page.model_dump()
 
 
-class ComparisonPageAgent(Agent[PipelineState]):
-    @property
-    def name(self) -> str:
-        return "comparison_page_builder"
+def build_fictional_product_b_agent(product_a: Product) -> FictionalProduct:
+    # This is intentionally separated: competitor generation is its own "agentic" step.
+    return build_fictional_product_b(product_a)
 
-    def run(self, state: PipelineState) -> PipelineState:
-        require(state.product is not None, "ComparisonPageAgent: product missing (run parser first).")
 
-        payload = DEFAULT_REGISTRY.get("comparison_page").render(state)
-        validate_comparison_page(payload)
-
-        state.comparison_page = payload
-        return state
+def build_comparison_page_agent(product_a: Product, product_b: FictionalProduct) -> dict[str, Any]:
+    llm = build_llm_provider()
+    page = build_comparison_page(product_a=product_a, product_b=product_b, llm=llm)
+    return page.model_dump()

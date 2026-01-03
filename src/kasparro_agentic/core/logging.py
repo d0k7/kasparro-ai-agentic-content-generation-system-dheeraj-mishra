@@ -1,23 +1,18 @@
 from __future__ import annotations
 
 import logging
-import sys
-from typing import Final
-
-DEFAULT_FORMAT: Final[str] = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 
 
-def setup_logging(level: str = "INFO") -> None:
-    root = logging.getLogger()
-    root.setLevel(level)
+def get_logger(name: str, level: str = "INFO") -> logging.Logger:
+    logger = logging.getLogger(name)
+    if logger.handlers:
+        # Avoid duplicate handlers if called multiple times
+        return logger
 
-    root.handlers.clear()
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(level)
-    handler.setFormatter(logging.Formatter(DEFAULT_FORMAT))
-    root.addHandler(handler)
-
-
-def get_logger(name: str) -> logging.Logger:
-    return logging.getLogger(name)
+    logger.setLevel(getattr(logging, level.upper(), logging.INFO))
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.propagate = False
+    return logger

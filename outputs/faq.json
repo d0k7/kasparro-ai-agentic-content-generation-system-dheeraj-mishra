@@ -1,32 +1,82 @@
 {
+  "page_type": "faq",
+  "product_name": "GlowBoost Vitamin C Serum",
   "disclaimer": "Informational only. Not medical advice. Patch test when trying new skincare.",
   "items": [
     {
-      "answer": "GlowBoost Vitamin C Serum is a 10% Vitamin C serum designed for Oily, Combination skin. It includes Vitamin C, Hyaluronic Acid and is positioned for Brightening, Fades dark spots.",
       "category": "Informational",
-      "question": "What is GlowBoost Vitamin C Serum?"
+      "question": "What is GlowBoost Vitamin C Serum?",
+      "answer": "This information is not specified in the provided dataset."
     },
     {
-      "answer": "Usage instruction: Apply 2–3 drops in the morning before sunscreen.",
+      "category": "Ingredients",
+      "question": "What are the key ingredients?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
+      "category": "Benefits",
+      "question": "What benefits does it provide?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
+      "category": "Skin Type",
+      "question": "Is it suitable for my skin type?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
       "category": "Usage",
-      "question": "How do I use GlowBoost Vitamin C Serum in a morning routine?"
+      "question": "How do I use it?",
+      "answer": "Apply 2-3 drops on clean face in the morning. Follow with moisturizer and sunscreen."
     },
     {
-      "answer": "Reported side effect in the dataset: Mild tingling for sensitive skin.",
       "category": "Safety",
-      "question": "Are there any side effects from using GlowBoost Vitamin C Serum?"
+      "question": "Are there any side effects or precautions?",
+      "answer": "No known side effects."
     },
     {
-      "answer": "The listed price is ₹699.",
-      "category": "Purchase",
-      "question": "What is the price of GlowBoost Vitamin C Serum?"
+      "category": "Routine",
+      "question": "Where does it fit in my routine?",
+      "answer": "This information is not specified in the provided dataset."
     },
     {
-      "answer": "The stated concentration is 10% Vitamin C.",
-      "category": "Informational",
-      "question": "What is the concentration of Vitamin C in GlowBoost Vitamin C Serum?"
+      "category": "Sunscreen",
+      "question": "Do I need sunscreen after using it?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
+      "category": "Storage",
+      "question": "How should I store it?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
+      "category": "Results",
+      "question": "When can I expect results?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
+      "category": "Frequency",
+      "question": "How often should I use it?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
+      "category": "Layering",
+      "question": "Can I layer it with other actives?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
+      "category": "Irritation",
+      "question": "What if it causes irritation?",
+      "answer": "This information is not specified in the provided dataset."
+    },
+    {
+      "category": "Price",
+      "question": "What is the price?",
+      "answer": "The listed price is ₹799."
+    },
+    {
+      "category": "Vitamin C %",
+      "question": "What is the Vitamin C concentration?",
+      "answer": "Concentration: 10% Vitamin C."
     }
-  ],
-  "page_type": "faq",
-  "product_name": "GlowBoost Vitamin C Serum"
+  ]
 }

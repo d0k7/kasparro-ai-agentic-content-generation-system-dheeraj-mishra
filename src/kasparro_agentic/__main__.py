@@ -1,57 +1,39 @@
 from __future__ import annotations
 
-import argparse
 from pathlib import Path
 
-from .core.logging import get_logger, setup_logging
-from .pipeline import run_pipeline
+from flask import Flask, jsonify, render_template, request
+
+from kasparro_agentic.orchestration import run_agent_workflow
+
+# Resolve project root: .../project/src/kasparro_agentic/__main__.py -> parents[2] is project root
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+STATIC_DIR = PROJECT_ROOT / "static"
+
+app = Flask(
+    __name__,
+    template_folder=str(TEMPLATES_DIR),
+    static_folder=str(STATIC_DIR),
+    static_url_path="/static",
+)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        prog="kasparro_agentic",
-        description="Kasparro Agentic Content Generation System (deterministic, modular DAG pipeline)",
-    )
-    parser.add_argument(
-        "--out-dir",
-        type=Path,
-        default=Path("outputs"),
-        help="Output directory for generated JSON files (default: outputs/)",
-    )
-    parser.add_argument(
-        "--log-level",
-        type=str,
-        default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        help="Logging level (default: INFO)",
-    )
+@app.get("/")
+def home():
+    return render_template("index.html")
 
-    args = parser.parse_args()
 
-    setup_logging(args.log_level)
-    log = get_logger("kasparro.cli")
+@app.post("/api/generate")
+def api_generate():
+    data = request.get_json(silent=True) or {}
+    product_name = str(data.get("productName", "")).strip()
+    if not product_name:
+        return jsonify({"error": "productName is required"}), 400
 
-    # Prove which module is running (useful on Windows + venvs)
-    import kasparro_agentic as pkg  # noqa: WPS433 (local debug import)
-
-    log.info("Running package from: %s", getattr(pkg, "__file__", "<unknown>"))
-    log.info("Output dir: %s", args.out_dir.resolve())
-
-    # Run pipeline
-    run_pipeline(output_dir=args.out_dir)
-
-    # Confirm outputs
-    expected = [
-        args.out_dir / "faq.json",
-        args.out_dir / "product_page.json",
-        args.out_dir / "comparison_page.json",
-        args.out_dir / "dag_metadata.json",
-    ]
-    for p in expected:
-        log.info("Wrote: %s | exists=%s", p, p.exists())
-
-    return 0
+    result = run_agent_workflow(product_name)
+    return jsonify(result)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    app.run(host="127.0.0.1", port=5000, debug=False)

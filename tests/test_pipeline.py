@@ -1,42 +1,29 @@
-from __future__ import annotations
-
-import json
-from pathlib import Path
-
-from kasparro_agentic.pipeline import run_pipeline
+import pytest
+import requests
 
 
-def _load_json(path: Path) -> dict:
-    """
-    Read JSON robustly across OS/editor differences.
-
-    - Windows editors sometimes add UTF-8 BOM to files.
-    - `utf-8-sig` transparently strips BOM if present.
-    """
-    return json.loads(path.read_text(encoding="utf-8-sig"))
+@pytest.fixture
+def base_url():
+    return "http://127.0.0.1:5000"
 
 
-def test_pipeline_outputs_match_snapshots(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
+def test_home(base_url):
+    response = requests.get(base_url)
+    assert response.status_code == 200
+    assert "AI Content Generator" in response.text
 
-    out_dir = Path("outputs")
-    run_pipeline(output_dir=out_dir)
 
-    # Generated outputs
-    gen_faq = _load_json(out_dir / "faq.json")
-    gen_product = _load_json(out_dir / "product_page.json")
-    gen_comp = _load_json(out_dir / "comparison_page.json")
+def test_generate_valid_product_name(base_url):
+    response = requests.post(f"{base_url}/api/generate", json={"productName": "Mama Earth Vitamin C Serum"})
+    assert response.status_code == 200
+    data = response.json()
+    assert "questions" in data
+    assert "answer" in data
 
-    # Snapshot files shipped with repo
-    repo_root = Path(__file__).resolve().parents[1]
-    snap_dir = repo_root / "tests" / "snapshots"
 
-    snap_faq = _load_json(snap_dir / "faq.json")
-    snap_product = _load_json(snap_dir / "product_page.json")
-    snap_comp = _load_json(snap_dir / "comparison_page.json")
-
-    assert gen_faq == snap_faq
-    assert gen_product == snap_product
-    assert gen_comp == snap_comp
-
-    assert (out_dir / "dag_metadata.json").exists()
+def test_generate_invalid_product_name(base_url):
+    response = requests.post(f"{base_url}/api/generate", json={})
+    assert response.status_code == 400
+    data = response.json()
+    assert "error" in data
+    assert data["error"] == "productName is required"

@@ -1,3 +1,4 @@
+# src/kasparro_agentic/agents/output_agent.py
 from __future__ import annotations
 
 import json
@@ -5,29 +6,32 @@ from pathlib import Path
 from typing import Any
 
 from ..core.validation import require
-from ..models import PipelineState
-from .base import Agent
 
 
-class OutputWriterAgent(Agent[PipelineState]):
-    @property
-    def name(self) -> str:
-        return "output_writer"
+def _write_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    def run(self, state: PipelineState) -> PipelineState:
-        out_dir = state.output_dir
-        out_dir.mkdir(parents=True, exist_ok=True)
 
-        self._write(out_dir / "faq.json", state.faq_page, "faq_page")
-        self._write(out_dir / "product_page.json", state.product_page, "product_page")
-        self._write(out_dir / "comparison_page.json", state.comparison_page, "comparison_page")
+def write_outputs(output_dir: Path, state: dict[str, Any]) -> dict[str, Path]:
+    require("faq" in state, "missing faq in graph state")
+    require("product_page" in state, "missing product_page in graph state")
+    require("comparison_page" in state, "missing comparison_page in graph state")
+    require("dag_metadata" in state, "missing dag_metadata in graph state")
 
-        return state
+    faq_path = output_dir / "faq.json"
+    product_path = output_dir / "product_page.json"
+    comparison_path = output_dir / "comparison_page.json"
+    dag_path = output_dir / "dag_metadata.json"
 
-    def _write(self, path: Path, obj: Any, field_name: str) -> None:
-        require(obj is not None, f"OutputWriterAgent: missing required page: {field_name}")
+    _write_json(faq_path, state["faq"])
+    _write_json(product_path, state["product_page"])
+    _write_json(comparison_path, state["comparison_page"])
+    _write_json(dag_path, state["dag_metadata"])
 
-        path.write_text(
-            json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True),
-            encoding="utf-8",
-        )
+    return {
+        "faq": faq_path,
+        "product_page": product_path,
+        "comparison_page": comparison_path,
+        "dag_metadata": dag_path,
+    }

@@ -1,72 +1,52 @@
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
-from ..core.validation import require, require_keys
-from ..models import PipelineState, Product
-from .base import Agent
+from kasparro_agentic.models import Product
 
 
-def _as_str_list(value: object, field_name: str) -> list[str]:
-    """
-    Convert an unknown object into list[str] with runtime validation.
-    Written to satisfy mypy strict checks.
-    """
-    require(isinstance(value, list), f"{field_name} must be a list")
+def _as_tuple_str(value: Any) -> tuple[str, ...]:
+    if value is None:
+        return tuple()
 
-    # After runtime check, cast for static typing.
-    items = cast(list[object], value)
+    # ✅ ruff UP038: use X | Y instead of (X, Y)
+    if isinstance(value, list | tuple):
+        return tuple(str(x).strip() for x in value if str(x).strip())
 
-    out: list[str] = []
-    for i, item in enumerate(items):
-        require(isinstance(item, str), f"{field_name}[{i}] must be a string")
-        out.append(cast(str, item))  # mypy: item is str after runtime check
-    return out
+    if isinstance(value, str):
+        parts = [p.strip() for p in value.split(",")]
+        return tuple(p for p in parts if p)
+
+    s = str(value).strip()
+    return (s,) if s else tuple()
 
 
-class DataParserAgent(Agent[PipelineState]):
-    @property
-    def name(self) -> str:
-        return "data_parser"
+def _as_int(value: Any, default: int = 0) -> int:
+    try:
+        if value is None:
+            return default
+        return int(value)
+    except (TypeError, ValueError):
+        return default
 
-    def run(self, state: PipelineState) -> PipelineState:
-        raw: dict[str, Any] = cast(dict[str, Any], state.raw_product)
 
-        require_keys(
-            raw,
-            [
-                "product_name",
-                "concentration",
-                "skin_type",
-                "key_ingredients",
-                "benefits",
-                "how_to_use",
-                "side_effects",
-                "price_inr",
-            ],
-            "RAW_PRODUCT_DATA",
-        )
+def _as_str(value: Any, default: str) -> str:
+    if value is None:
+        return default
+    s = str(value).strip()
+    return s if s else default
 
-        product_name = str(raw["product_name"])
-        concentration = str(raw["concentration"])
-        how_to_use = str(raw["how_to_use"])
-        side_effects = str(raw["side_effects"])
 
-        skin_type_list = _as_str_list(raw["skin_type"], "skin_type")
-        key_ingredients_list = _as_str_list(raw["key_ingredients"], "key_ingredients")
-        benefits_list = _as_str_list(raw["benefits"], "benefits")
-
-        price_raw = raw["price_inr"]
-        require(isinstance(price_raw, int), "price_inr must be an integer")
-
-        state.product = Product(
-            product_name=product_name,
-            concentration=concentration,
-            skin_type=tuple(skin_type_list),
-            key_ingredients=tuple(key_ingredients_list),
-            benefits=tuple(benefits_list),
-            how_to_use=how_to_use,
-            side_effects=side_effects,
-            price_inr=price_raw,
-        )
-        return state
+def parse_product(raw: dict[str, Any]) -> Product:
+    return Product(
+        product_name=_as_str(raw.get("product_name"), "Unknown Product"),
+        brand=_as_str(raw.get("brand"), "Unknown"),
+        category=_as_str(raw.get("category"), "Unknown"),
+        price_inr=_as_int(raw.get("price_inr"), 0),
+        key_ingredients=_as_tuple_str(raw.get("key_ingredients")),
+        benefits=_as_tuple_str(raw.get("benefits")),
+        skin_type=_as_tuple_str(raw.get("skin_type")),
+        concentration=_as_str(raw.get("concentration"), "Not specified in the provided dataset."),
+        how_to_use=_as_str(raw.get("how_to_use"), "Not specified in the provided dataset."),
+        side_effects=_as_str(raw.get("side_effects"), "Not specified in the provided dataset."),
+    )

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Generator</title>
+    <script src="https://js.puter.com/v2/"></script>
+</head>
+<body>
+    <h1>AI Content Generator</h1>
+    <div>
+        <h2>Generated Questions:</h2>
+        <pre id="generatedQuestions"></pre>
+    </div>
+    <div>
+        <h2>Generated Answer:</h2>
+        <pre id="generatedAnswer"></pre>
+    </div>
+
+    <script>
+        const product = "GlowBoost Vitamin C Serum";  // This can be dynamically updated later
+
+        // Generate questions dynamically using GPT-4o model
+        puter.ai.chat(`Generate a list of common questions about the product: ${product}`, { model: "gpt-4o" })
+            .then(response => {
+                document.getElementById('generatedQuestions').innerText = response;
+            })
+            .catch(error => {
+                console.error("Error generating questions:", error);
+            });
+
+        // Generate an answer to a selected question
+        puter.ai.chat(`What are the benefits of GlowBoost Vitamin C Serum?`, { model: "gpt-4o" })
+            .then(response => {
+                document.getElementById('generatedAnswer').innerText = response;
+            })
+            .catch(error => {
+                console.error("Error generating answer:", error);
+            });
+    </script>
+</body>
+</html>

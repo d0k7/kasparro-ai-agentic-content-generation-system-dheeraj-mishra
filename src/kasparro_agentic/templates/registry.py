@@ -1,32 +1,31 @@
 ﻿from __future__ import annotations
 
-from collections.abc import Mapping
 from dataclasses import dataclass
 
-from ..models import PipelineState
-from .pages import COMPARISON_TEMPLATE, FAQ_TEMPLATE, PRODUCT_TEMPLATE
-from .template_engine import Template
+from kasparro_agentic.templates.pages import (
+    ComparisonPageTemplate,
+    FAQTemplate,
+    ProductPageTemplate,
+    QuestionTemplate,
+)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class TemplateRegistry:
     """
-    Registry pattern:
-    - Adding a new page type becomes a single registry entry + template definition.
+    Central place to access template implementations.
+    This keeps the codebase modular and makes swapping templates easy.
     """
-    templates: Mapping[str, Template[PipelineState]]
-
-    def get(self, key: str) -> Template[PipelineState]:
-        try:
-            return self.templates[key]
-        except KeyError as e:
-            raise KeyError(f"Unknown template key: {key}") from e
+    question: QuestionTemplate
+    faq: FAQTemplate
+    product_page: ProductPageTemplate
+    comparison_page: ComparisonPageTemplate
 
 
-DEFAULT_REGISTRY = TemplateRegistry(
-    templates={
-        "faq": FAQ_TEMPLATE,
-        "product_page": PRODUCT_TEMPLATE,
-        "comparison_page": COMPARISON_TEMPLATE,
-    }
-)
+def build_registry() -> TemplateRegistry:
+    return TemplateRegistry(
+        question=QuestionTemplate(),
+        faq=FAQTemplate(),
+        product_page=ProductPageTemplate(),
+        comparison_page=ComparisonPageTemplate(),
+    )

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 
-class PipelineError(RuntimeError):
-    """Base class for pipeline-related failures."""
+class KasparroError(Exception):
+    """Base exception for the project."""
 
 
-class ValidationError(PipelineError):
-    """Raised when a state or output payload fails validation."""
+class ValidationError(KasparroError):
+    """Raised when structured output validation fails."""
+
+
+class LLMError(KasparroError):
+    """Raised when LLM invocation fails or returns invalid payload."""

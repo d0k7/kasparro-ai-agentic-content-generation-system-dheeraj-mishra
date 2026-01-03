@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AI Content Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>AI Content Generator</h1>
+
+      <label for="productName">Enter Product Name:</label>
+      <div class="input-group">
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="productName"
+            placeholder="Type something to generate........."
+            autocomplete="off"
+          />
+        </div>
+        <button id="generateBtn" type="button">Generate</button>
+      </div>
+
+      <div id="error" style="display:none;"></div>
+
+      <div id="results-area">
+        <h2>Generated Questions:</h2>
+        <ul id="questions"></ul>
+
+        <h2>Generated Answer:</h2>
+        <div class="answer-box" id="answer"></div>
+      </div>
+    </div>
+
+    <!-- Puter SDK (client-side LLM) -->
+    <script src="https://js.puter.com/v2/"></script>
+
+    <!-- App JS -->
+    <script src="{{ url_for('static', filename='content.js') }}"></script>
+  </body>
+</html>
