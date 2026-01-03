@@ -153,6 +153,16 @@ To run the tests, use the following command:
 pytest -q
 
 
+Frontend User Interface
+
+Localhost Frontend: The system includes a local web interface where users can input a product name.
+
+Dynamic Content Generation: When a product name is entered, the system generates questions and answers dynamically using Puter (real LLMs).
+
+Users can interact with the system and see the generated content in real-time.
+
+
+
 Important Notes :
 
 Puter LLM Integration: The system uses Puter to interface with real LLMs (such as OpenAI) for dynamic content generation.
