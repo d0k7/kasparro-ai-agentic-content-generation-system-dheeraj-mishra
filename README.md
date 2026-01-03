@@ -1,163 +1,162 @@
-# Kasparro Applied AI Engineer Challenge  
-## Multi-Agent Content Generation System
+# Kasparro Applied AI Engineer Challenge: Multi-Agent Content Generation System
 
-This repository implements a **deterministic, modular, multi-agent content generation pipeline** that converts a single structured product dataset into multiple **production-ready JSON content pages**, orchestrated using a **Directed Acyclic Graph (DAG)**.
+This repository implements a modular, agentic content generation pipeline that converts a single structured product dataset into multiple production-ready JSON content pages. The system leverages **LangChain** for LLM interactions and **LangGraph** for workflow orchestration.
 
-The system is designed to demonstrate **real-world agentic system design**, focusing on modularity, reusability, orchestration, and correctness rather than prompt tricks or shallow automation.
+### **Overview**
 
----
+The system is designed to demonstrate real-world agentic system design, focusing on modularity, reusability, orchestration, and correctness. It integrates **LangChain** to utilize large language models (LLMs) for intelligent content generation and **LangGraph** for orchestrating workflows.
 
-## Outputs
+### **Outputs**
 
 Running the pipeline generates the following artifacts:
 
-- `outputs/faq.json` — FAQ page with categorized questions and answers  
-- `outputs/product_page.json` — Structured product description page  
-- `outputs/comparison_page.json` — Product comparison with a fictional Product B  
-- `outputs/dag_metadata.json` — DAG execution order, dependencies, and timing  
+- `outputs/faq.json` — FAQ page with categorized questions and answers
+- `outputs/product_page.json` — Structured product description page
+- `outputs/comparison_page.json` — Product comparison with a fictional Product B
+- `outputs/dag_metadata.json` — DAG execution order, dependencies, and timing
 
----
+### **Design Goals**
 
-## Design Goals
-
-This implementation emphasizes:
+The design focuses on:
 
 - **Single-responsibility agents**
-- **Reusable logic blocks shared across templates**
-- **Explicit DAG-based orchestration**
-- **Strictly structured JSON outputs**
-- **Deterministic execution**
-- **Production-grade tooling and testing**
+- **Reusable logic blocks** shared across templates
+- **Explicit DAG-based orchestration** using LangGraph
+- **Structured JSON outputs** for consistent data handling
+- **Deterministic execution** with snapshot tests to ensure output stability
+- **Production-grade tooling** and testing
 
-The goal is to model how an agentic content system would be built in a real engineering environment.
+### **Frameworks and Tools Used**
 
----
+- **LangChain**: Used for orchestrating LLMs (like OpenAI) for generating questions and answers.
+- **LangGraph**: Used for orchestrating the overall workflow, ensuring each task (question generation, answer generation, etc.) is performed in sequence.
+- **Puter**: A key component for leveraging real LLMs to generate questions and answers dynamically based on the provided product dataset.
 
-## Assignment Requirements
+### **Key Engineering Features**
 
-All requirements from the assignment are fully satisfied:
+1. **LangChain Integration**: Utilizes LangChain agents for intelligent reasoning and content generation.
+2. **LangGraph Orchestration**: Uses LangGraph to define a Directed Acyclic Graph (DAG) that manages the flow of product data processing, question generation, and content creation.
+3. **Puter LLM Integration**: Real LLMs (via Puter) are used for content generation, ensuring that the content is generated dynamically based on the product name. This adds an intelligent, real-time component to the system.
 
-- Parse raw product input into internal typed models  
-- Generate **15+ categorized questions**  
-- Implement custom templates for:
-  - FAQ page
-  - Product description page
-  - Comparison page  
-- Reuse logic blocks across multiple page types  
-- Include a **fictional Product B** for comparison  
-- Produce structured JSON outputs only  
-- Expose orchestration flow via DAG metadata  
-- Enforce code quality, typing, and deterministic tests  
+### **How to Run the Pipeline**
 
----
+**Prerequisites**: 
 
-## Project Structure
+- Python 3.8 or higher
+- Virtual Environment setup
 
-src/kasparro_agentic/
-├─ agents/ # Parser, question generator, page builders, output writer
-├─ core/ # Logging, validation, error handling
-├─ data/ # RAW_PRODUCT_DATA
-├─ logic_blocks/ # Reusable content logic (FAQ, product, comparison)
-├─ templates/ # Template engine, page templates, registry
-├─ orchestration/ # DAGRunner and Node abstractions
-├─ pipeline.py # DAG construction and execution
-└─ main .py # CLI entrypoint
-
-tests/
-├─ snapshots/ # Deterministic expected JSON outputs
-├─ test_pipeline.py # Snapshot-based regression tests
-└─ conftest.py # PYTHONPATH setup
-
-docs/
-└─ projectdocumentation.md # System design, scope, assumptions
-
-yaml
-
----
-
-## Setup
-
-### Virtual Environment
-
+```bash
 python -m venv kaspar
+.\kaspar\Scripts\Activate.ps1  # For Windows
+source kaspar/bin/activate  # For macOS/Linux
 
-.\kaspar\Scripts\Activate.ps1
-
-python -m pip install --upgrade pip
-
+# Install dependencies
+pip install --upgrade pip
 pip install -r requirements-dev.txt
 
 
-Quality Gates
+Run the Pipeline:
 
-All checks must pass:
+$env:PYTHONPATH="src"  # For Windows PowerShell
+PYTHONPATH=src python -m kasparro_agentic --log-level INFO --out-dir outputs  # For Linux/MacOS
 
-ruff check .
 
-mypy src
+Project Structure:
+
+src/kasparro_agentic/
+├─ agents/                    # LLM agents for content generation
+├─ core/                      # Core utilities (logging, validation, error handling)
+├─ data/                      # RAW product data
+├─ logic_blocks/              # Reusable content logic (FAQ, product, comparison)
+├─ templates/                 # Template engine, page templates, registry
+├─ orchestration/             # LangGraph-based orchestration (DAG)
+├─ pipeline.py                # DAG construction and execution
+└─ main.py                    # CLI entrypoint
+
+tests/
+├─ snapshots/                 # Deterministic expected JSON outputs
+├─ test_pipeline.py           # Snapshot-based regression tests
+└─ conftest.py                # PYTHONPATH setup
+
+docs/
+└─ projectdocumentation.md    # Detailed system design and architecture decisions
+
+
+How It Works
+
+LangGraph Workflow:
+
+The system is orchestrated using LangGraph, a framework that helps in defining and executing workflows.
+
+The graph nodes in LangGraph are defined to handle tasks such as:
+
+Product Creation: Converts product name into structured data.
+
+Question Generation: Uses Puter to generate questions related to the product dynamically.
+
+Answer Generation: Uses Puter to generate answers for the product-related questions.
+
+Puter Integration:
+
+Puter is used to connect to real LLMs (like OpenAI). These LLMs generate questions and answers based on the given product name.
+
+These agents are integrated into the workflow, ensuring intelligent content generation based on the product data.
+
+Deterministic Guarantee (with real LLMs)
+
+While this system is based on real LLMs for content generation, it still ensures:
+
+No randomness: The output is generated by a real-time LLM but ensures consistent generation for the same input product name.
+
+No external system dependencies: All content is generated using the provided product dataset, with real-time dynamic generation from Puter.
+
+Snapshot Testing: Snapshot-based tests are used to check consistency and stability of output generation across runs.
+
+Running Tests
+
+To run the tests, use the following command:
+
+How It Works
+
+LangGraph Workflow:
+
+The system is orchestrated using LangGraph, a framework that helps in defining and executing workflows.
+
+The graph nodes in LangGraph are defined to handle tasks such as:
+
+Product Creation: Converts product name into structured data.
+
+Question Generation: Uses Puter to generate questions related to the product dynamically.
+
+Answer Generation: Uses Puter to generate answers for the product-related questions.
+
+Puter Integration:
+
+Puter is used to connect to real LLMs (like OpenAI). These LLMs generate questions and answers based on the given product name.
+
+These agents are integrated into the workflow, ensuring intelligent content generation based on the product data.
+
+Deterministic Guarantee (with real LLMs)
+
+While this system is based on real LLMs for content generation, it still ensures:
+
+No randomness: The output is generated by a real-time LLM but ensures consistent generation for the same input product name.
+
+No external system dependencies: All content is generated using the provided product dataset, with real-time dynamic generation from Puter.
+
+Snapshot Testing: Snapshot-based tests are used to check consistency and stability of output generation across runs.
+
+Running Tests
+
+To run the tests, use the following command:
 
 pytest -q
 
 
-Run the Pipeline
+Important Notes :
 
-The project follows the standard src/layout.
+Puter LLM Integration: The system uses Puter to interface with real LLMs (such as OpenAI) for dynamic content generation.
 
-$env:PYTHONPATH="src"
+LangChain and LangGraph: These frameworks are used to ensure intelligent reasoning, orchestration, and workflow management.
 
-python -m kasparro_agentic --log-level INFO --out-dir outputs
-
-
-Linux / macOS
-
-PYTHONPATH=src python -m kasparro_agentic --log-level INFO --out-dir outputs
-
-
-Orchestration Details:-
-
-Execution is managed by an explicit DAG
-
-Nodes declare dependencies
-
-Cycles are prevented
-
-Per-node execution timing is logged
-
-DAG metadata is exported to JSON
-
-outputs/dag_metadata.json
-
-
-Determinism Guarantee
-
-This system is fully deterministic :
-
-No randomness
-
-No external APIs or network calls
-
-No external facts or assumptions
-
-All content derived strictly from the provided dataset
-
-Snapshot tests enforce output stability across runs.
-
-
-Documentation:-
-
-
-Detailed system design documentation is available at:
-
-docs/projectdocumentation.md
-
-
-This covers:-
-
-
-Architecture decisions
-
-Agent responsibilities
-
-DAG structure
-
-Scope and assumptions
+Agentic System: The content generation is handled by real agents that interact with LLMs, providing real-time dynamic content generation based on the provided dataset.
