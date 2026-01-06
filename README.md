@@ -1,4 +1,4 @@
-# Kasparro Applied AI Engineer Challenge: Multi-Agent Content Generation System
+# Multi-Agent Content Generation System
 
 This repository implements a modular, agentic content generation pipeline that converts a single structured product dataset into multiple production-ready JSON content pages. The system leverages **LangChain** for LLM interactions and **LangGraph** for workflow orchestration.
 
